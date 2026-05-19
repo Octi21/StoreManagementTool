@@ -1,8 +1,11 @@
 package com.example.StoreManagementTool.service.impl;
 
 import com.example.StoreManagementTool.dto.request.CreateProductRequest;
+import com.example.StoreManagementTool.dto.request.UpdateProductRequest;
+import com.example.StoreManagementTool.dto.request.UpdateStockRequest;
 import com.example.StoreManagementTool.dto.response.ProductResponse;
 import com.example.StoreManagementTool.entity.Product;
+import com.example.StoreManagementTool.exception.ResourceNotFoundException;
 import com.example.StoreManagementTool.mapper.ProductMapper;
 import com.example.StoreManagementTool.repository.ProductRepository;
 import com.example.StoreManagementTool.service.ProductService;
@@ -46,4 +49,39 @@ public class ProductServiceImpl  implements ProductService {
 
         return products.stream().map(productMapper::toResponse).toList();
     }
+
+    public ProductResponse findById(Long id) {
+        Product product = getProductOrThrow(id);
+        return productMapper.toResponse(product);
+    }
+
+    public ProductResponse updateStock(Long id, UpdateStockRequest request) {
+        Product product = getProductOrThrow(id);
+        product.setStockQuantity(request.stockQuantity());
+        log.info("Updated stock for product id={} to {}", id, request.stockQuantity());
+        return productMapper.toResponse(product);
+    }
+
+    public ProductResponse update(Long id, UpdateProductRequest request) {
+        Product product = getProductOrThrow(id);
+        product.setName(request.name());
+        product.setDescription(request.description());
+        log.info("Updated product id={}", id);
+        return productMapper.toResponse(product);
+    }
+
+    public void delete(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw ResourceNotFoundException.of("Product", id);
+        }
+        productRepository.deleteById(id);
+        log.info("Deleted product id={}", id);
+    }
+
+
+        private Product getProductOrThrow(Long id){
+        return productRepository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.of("Product", id));
+    }
+
 }
