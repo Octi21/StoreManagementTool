@@ -1,14 +1,19 @@
 package com.example.StoreManagementTool.service.impl;
 
+import com.example.StoreManagementTool.dto.request.ChangePriceRequest;
 import com.example.StoreManagementTool.dto.request.CreateProductRequest;
 import com.example.StoreManagementTool.dto.request.UpdateProductRequest;
 import com.example.StoreManagementTool.dto.request.UpdateStockRequest;
+import com.example.StoreManagementTool.dto.response.PriceHistoryResponse;
 import com.example.StoreManagementTool.dto.response.ProductResponse;
 import com.example.StoreManagementTool.entity.Category;
+import com.example.StoreManagementTool.entity.PriceHistory;
 import com.example.StoreManagementTool.entity.Product;
 import com.example.StoreManagementTool.exception.ResourceNotFoundException;
+import com.example.StoreManagementTool.mapper.PriceHistoryMapper;
 import com.example.StoreManagementTool.mapper.ProductMapper;
 import com.example.StoreManagementTool.repository.CategoryRepository;
+import com.example.StoreManagementTool.repository.PriceHistoryRepository;
 import com.example.StoreManagementTool.repository.ProductRepository;
 import com.example.StoreManagementTool.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 @Service
 public class ProductServiceImpl  implements ProductService {
@@ -27,13 +33,20 @@ public class ProductServiceImpl  implements ProductService {
 
     private final CategoryRepository categoryRepository;
 
+    private final PriceHistoryRepository priceHistoryRepository;
+
 
     private final ProductMapper productMapper;
 
-    public ProductServiceImpl(ProductRepository productRepository,CategoryRepository categoryRepository, ProductMapper productMapper){
+    private final PriceHistoryMapper priceHistoryMapper;
+
+
+    public ProductServiceImpl(ProductRepository productRepository,CategoryRepository categoryRepository, PriceHistoryRepository priceHistoryRepository, ProductMapper productMapper,PriceHistoryMapper priceHistoryMapper){
         this.productMapper = productMapper;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.priceHistoryRepository = priceHistoryRepository;
+        this.priceHistoryMapper = priceHistoryMapper;
     }
 
     public ProductResponse create(CreateProductRequest request){
@@ -91,6 +104,34 @@ public class ProductServiceImpl  implements ProductService {
         log.info("Updated product id={}", id);
         return productMapper.toResponse(product);
     }
+    public ProductResponse changePrice(Long id, ChangePriceRequest request){
+        Product product = getProductOrThrow(id);
+        BigDecimal oldPrice = product.getPrice();
+        BigDecimal newPrice = request.newPrice();
+
+        if (oldPrice.compareTo(newPrice) == 0) {
+            log.debug("Price change requested for product id={} but value is unchanged", id);
+            return productMapper.toResponse(product);
+        }
+
+        product.setPrice(newPrice);
+        priceHistoryRepository.save(new PriceHistory(product,oldPrice,newPrice));
+        log.info("Changed price for product id={} from {} to {}", id, oldPrice, newPrice);
+
+        return productMapper.toResponse(product);
+    }
+
+    public List<PriceHistoryResponse> getPriceHistory(Long productId){
+        if (!productRepository.existsById(productId)) {
+            throw ResourceNotFoundException.of("Product", productId);
+        }
+        return priceHistoryRepository.findByProductIdOrderByChangedAtDesc(productId)
+                .stream()
+                .map(priceHistoryMapper::toResponse)
+                .toList();
+
+    }
+
 
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {

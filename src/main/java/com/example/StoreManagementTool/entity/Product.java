@@ -55,6 +55,11 @@ public class Product {
         this.updatedAt = now;
     }
 
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
