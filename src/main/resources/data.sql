@@ -28,3 +28,12 @@ VALUES ('USB-C Hub', '7-in-1 adapter', 49.99, 150, 2, CURRENT_TIMESTAMP, CURRENT
 INSERT INTO products (name, description, price, stock_quantity, category_id, created_at, updated_at)
 VALUES ('Monitor 27"', '4K IPS display', 399.00, 40, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- Users (passwords: admin123, manager123, user123)
+INSERT INTO users (username, password, role, enabled, created_at)
+VALUES ('admin', '$2b$10$o9Ol4GFbjo2Yoed9.lq3/uTTDLVLeNBs2xUVri4BbxMsiaOPY8QQO', 'ADMIN', TRUE, CURRENT_TIMESTAMP);
+
+INSERT INTO users (username, password, role, enabled, created_at)
+VALUES ('manager', '$2b$10$kWWQOXG0Fw1UApr3hjpngut80BjowEPDXQOjxWnM/CgW2sqXLZmBy', 'MANAGER', TRUE, CURRENT_TIMESTAMP);
+
+INSERT INTO users (username, password, role, enabled, created_at)
+VALUES ('user', '$2b$10$Gvwsl3VKd7vSeE96bMX4MeS4yGNkeXXnJFE25YZ5YdHbsxJ8gzs3K', 'USER', TRUE, CURRENT_TIMESTAMP);
