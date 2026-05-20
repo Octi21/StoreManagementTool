@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Size;
 
 public record UpdateProductRequest(
         @NotBlank @Size(max = 100) String name,
-        @Size(max = 500) String description
+        @Size(max = 500) String description,
+
+        Long categoryId
+
 ) {
 }

@@ -24,7 +24,10 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> getAll(){
+    public List<ProductResponse> getAll(@RequestParam(required = false) String categoryName){
+        if(categoryName != null){
+            return  productService.findAllByCategoryName(categoryName);
+        }
         return productService.findAll();
     }
 

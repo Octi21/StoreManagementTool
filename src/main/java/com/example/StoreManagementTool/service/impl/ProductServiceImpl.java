@@ -4,11 +4,14 @@ import com.example.StoreManagementTool.dto.request.CreateProductRequest;
 import com.example.StoreManagementTool.dto.request.UpdateProductRequest;
 import com.example.StoreManagementTool.dto.request.UpdateStockRequest;
 import com.example.StoreManagementTool.dto.response.ProductResponse;
+import com.example.StoreManagementTool.entity.Category;
 import com.example.StoreManagementTool.entity.Product;
 import com.example.StoreManagementTool.exception.ResourceNotFoundException;
 import com.example.StoreManagementTool.mapper.ProductMapper;
+import com.example.StoreManagementTool.repository.CategoryRepository;
 import com.example.StoreManagementTool.repository.ProductRepository;
 import com.example.StoreManagementTool.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,19 +25,26 @@ public class ProductServiceImpl  implements ProductService {
 
     private final ProductRepository productRepository;
 
+    private final CategoryRepository categoryRepository;
+
+
     private final ProductMapper productMapper;
 
-    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper){
+    public ProductServiceImpl(ProductRepository productRepository,CategoryRepository categoryRepository, ProductMapper productMapper){
         this.productMapper = productMapper;
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public ProductResponse create(CreateProductRequest request){
+        Category category = resolveCategory(request.categoryId());
+
         Product product = new Product(
                 request.name(),
                 request.description(),
                 request.price(),
-                request.stockQuantity()
+                request.stockQuantity(),
+                category
         );
 
         Product saved = productRepository.save(product);
@@ -46,6 +56,17 @@ public class ProductServiceImpl  implements ProductService {
 
     public List<ProductResponse> findAll(){
         List<Product> products = productRepository.findAll();
+
+        return products.stream().map(productMapper::toResponse).toList();
+    }
+
+    public List<ProductResponse> findAllByCategoryName(String categoryName){
+        if (!categoryRepository.existsByName(categoryName)) {
+            throw new EntityNotFoundException(
+                    "Category not found with name: " + categoryName);
+        }
+
+        List<Product> products = productRepository.findByCategoryName(categoryName);
 
         return products.stream().map(productMapper::toResponse).toList();
     }
@@ -66,6 +87,7 @@ public class ProductServiceImpl  implements ProductService {
         Product product = getProductOrThrow(id);
         product.setName(request.name());
         product.setDescription(request.description());
+        product.setCategory(resolveCategory(request.categoryId()));
         log.info("Updated product id={}", id);
         return productMapper.toResponse(product);
     }
@@ -79,9 +101,18 @@ public class ProductServiceImpl  implements ProductService {
     }
 
 
-        private Product getProductOrThrow(Long id){
+    private Product getProductOrThrow(Long id){
         return productRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.of("Product", id));
     }
+
+    private Category resolveCategory(Long categoryId) {
+        if (categoryId == null) {
+            return null;
+        }
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> ResourceNotFoundException.of("Category", categoryId));
+    }
+
 
 }

@@ -30,17 +30,22 @@ public class Product {
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public Product(String name, String description, BigDecimal price, Integer stockQuantity) {
+    public Product(String name, String description, BigDecimal price, Integer stockQuantity, Category category) {
         this.name = name;
         this.description=description;
         this.price = price;
         this.stockQuantity = stockQuantity;
+        this.category = category;
     }
 
     @PrePersist

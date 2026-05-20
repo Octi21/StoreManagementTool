@@ -13,6 +13,8 @@ public interface ProductService {
     public ProductResponse create(CreateProductRequest createProductRequest);
 
     public List<ProductResponse> findAll();
+    public List<ProductResponse> findAllByCategoryName(String categoryName);
+
 
     public ProductResponse findById(Long id);
 
