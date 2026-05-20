@@ -12,3 +12,18 @@ VALUES ('USB-C Hub', '7-in-1 adapter', 49.99, 150, CURRENT_TIMESTAMP, CURRENT_TI
 
 INSERT INTO products (name, description, price, stock_quantity, created_at, updated_at)
 VALUES ('Monitor 27"', '4K IPS display', 399.00, 40, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO categories (name, description)
+VALUES ('Electronics', 'Electronic devices and gadgets');
+
+INSERT INTO categories (name, description)
+VALUES ('Accessories', 'Computer and mobile accessories');
+
+INSERT INTO categories (name, description)
+VALUES ('Peripherals', 'Keyboards, mice, and input devices');
+
+INSERT INTO categories (name, description)
+VALUES ('Displays', 'Monitors and screens');
+
+INSERT INTO categories (name, description)
+VALUES ('Storage', 'Hard drives, SSDs, and memory cards');
