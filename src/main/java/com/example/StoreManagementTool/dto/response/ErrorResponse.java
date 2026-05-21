@@ -18,5 +18,8 @@ public record ErrorResponse(
         return new ErrorResponse(Instant.now(), status, error, message, path, null);
     }
 
+    public static ErrorResponse of(int status, String error, String message, String path, List<FieldError> fieldErrors) {
+        return new ErrorResponse(Instant.now(), status, error, message, path, fieldErrors);
+    }
 
 }

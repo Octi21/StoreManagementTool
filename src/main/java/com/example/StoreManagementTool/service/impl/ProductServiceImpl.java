@@ -19,14 +19,18 @@ import com.example.StoreManagementTool.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 @Service
+@Transactional
 public class ProductServiceImpl  implements ProductService {
 
-    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
 
     private final ProductRepository productRepository;
@@ -66,24 +70,24 @@ public class ProductServiceImpl  implements ProductService {
         return productMapper.toResponse(saved);
 
     }
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> findAll(Pageable pageable){
+        Page<Product> page = productRepository.findAll(pageable);
 
-    public List<ProductResponse> findAll(){
-        List<Product> products = productRepository.findAll();
-
-        return products.stream().map(productMapper::toResponse).toList();
+        return page.map(productMapper::toResponse);
     }
-
-    public List<ProductResponse> findAllByCategoryName(String categoryName){
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> findAllByCategoryName(String categoryName,Pageable pageable){
         if (!categoryRepository.existsByName(categoryName)) {
             throw new EntityNotFoundException(
                     "Category not found with name: " + categoryName);
         }
 
-        List<Product> products = productRepository.findByCategoryName(categoryName);
+        Page<Product> page = productRepository.findByCategoryName(categoryName,pageable);
 
-        return products.stream().map(productMapper::toResponse).toList();
+        return page.map(productMapper::toResponse);
     }
-
+    @Transactional(readOnly = true)
     public ProductResponse findById(Long id) {
         Product product = getProductOrThrow(id);
         return productMapper.toResponse(product);
@@ -120,7 +124,7 @@ public class ProductServiceImpl  implements ProductService {
 
         return productMapper.toResponse(product);
     }
-
+    @Transactional(readOnly = true)
     public List<PriceHistoryResponse> getPriceHistory(Long productId){
         if (!productRepository.existsById(productId)) {
             throw ResourceNotFoundException.of("Product", productId);

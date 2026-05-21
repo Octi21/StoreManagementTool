@@ -14,12 +14,14 @@ import com.example.StoreManagementTool.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
-    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+    private static final Logger log = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
@@ -30,11 +32,11 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
     }
-
+    @Transactional(readOnly = true)
     public List<CategoryResponse> findAll(){
         return categoryRepository.findAll().stream().map(categoryMapper::toResponse).toList();
     }
-
+    @Transactional(readOnly = true)
     public CategoryResponse findById(Long id){
         Category category = getCategoryOrThrow(id);
         return  categoryMapper.toResponse(category);

@@ -3,9 +3,7 @@ package com.example.StoreManagementTool.controller;
 import com.example.StoreManagementTool.dto.request.CreateCategoryRequest;
 import com.example.StoreManagementTool.dto.response.CategoryResponse;
 import com.example.StoreManagementTool.service.CategoryService;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +11,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/categories")
+@RequestMapping("/api/categories")
 public class CategoryController {
     private final CategoryService categoryService;
 
